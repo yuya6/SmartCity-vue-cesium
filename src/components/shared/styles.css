@@ -1,0 +1,128 @@
+/**
+ * 全局基础样式 + 主题变量注入
+ * 仅在使用控件库时导入一次（main.ts 或 App.vue 中 import '@/components/shared/styles.css'）
+ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  color-scheme: dark;
+}
+
+html, body, #app {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: var(--bg-deep, #050816);
+  color: var(--text-primary, #fff);
+  font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system,
+    BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-feature-settings: 'tnum' on, 'lnum' on;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+
+/* Tabular nums（数字等宽）工具类 */
+.tnum, .tabular, .kpi-value, .num {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: 'tnum' on, 'lnum' on;
+}
+
+.mono, .kpi-value, .num-mono {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* 防止大屏 UI 被选中（触控 / 鼠标拖拽） */
+.noselect,
+.smart-panel,
+.smart-chart,
+.smart-card {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ---------- 通用工具类 ---------- */
+.flex { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.items-center { align-items: center; }
+.items-end { align-items: flex-end; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.gap-sm { gap: 8px; }
+.gap-md { gap: 16px; }
+.gap-lg { gap: 24px; }
+.relative { position: relative; }
+.absolute { position: absolute; }
+.w-full { width: 100%; }
+.h-full { height: 100%; }
+.text-secondary { color: var(--text-secondary); }
+.text-tertiary { color: var(--text-tertiary); }
+
+/* ---------- 响应式字体：基于 1920 基准 ---------- */
+/* FHD (<=1920) 默认 16px */
+:root { font-size: 16px; }
+@media (min-width: 2560px) { :root { font-size: 20px; } } /* 2K */
+@media (min-width: 3840px) { :root { font-size: 28px; } } /* 4K */
+
+/* ---------- 面板外层基础样式（所有面板可通过 class="smart-panel" 启用） ---------- */
+.smart-panel {
+  position: relative;
+  padding: 0.75rem 1rem 1rem;
+  border: 1px solid var(--border-subtle);
+  background:
+    linear-gradient(180deg, rgba(12, 18, 48, 0.88) 0%, rgba(11, 17, 45, 0.72) 100%);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border-radius: 4px;
+  /* 四角切角装饰 */
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border: 1px solid var(--accent-cyan);
+    pointer-events: none;
+  }
+  &::before {
+    top: -1px; left: -1px;
+    border-right: 0; border-bottom: 0;
+  }
+  &::after {
+    bottom: -1px; right: -1px;
+    border-left: 0; border-top: 0;
+  }
+  /* 右上角、左下角角标（伪元素不够，用 mask 替代，保持简单） */
+}
+
+/* 科技感发光标题 */
+.smart-title {
+  color: var(--text-primary);
+  letter-spacing: 0.12em;
+  text-shadow: 0 0 12px rgba(0, 212, 255, 0.45);
+  font-weight: 600;
+}
+
+/* 微动效：淡入向上 */
+@keyframes smart-fade-up {
+  0% { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: smart-fade-up .6s ease-out both; }
+
+@keyframes smart-fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+.fade-in { animation: smart-fade-in .5s ease-out both; }
+
+/* 滚动条美化（用于可滚动区域） */
+.smart-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+.smart-scroll::-webkit-scrollbar-track { background: transparent; }
+.smart-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--accent-cyan-deep), var(--accent-cyan));
+  border-radius: 3px;
+}

@@ -1,0 +1,85 @@
+# ============================================================
+#  Git LFS 跟踪规则
+#  ------------------------------------------------------------
+#  本项目 public/ 目录包含 ~12,000 个二进制文件合计 ~125MB：
+#    - .terrain 地形瓦片（数量最多，占 ~95% 文件数）
+#    - .glb / .gltf / .fbx 3D 模型
+#    - .jpg / .jpeg / .png / .gif 纹理、天空盒、截图
+#    - .gz 压缩包（地形/模型量化产物）
+#  统一通过 Git LFS 管理，避免仓库体积不可逆膨胀。
+#
+#  首次启用 LFS（本机一次即可）：
+#    git lfs install
+#    git add .gitattributes
+#    git commit -m "chore: enable Git LFS for binary assets"
+#
+#  已有历史提交未走 LFS？用 git lfs migrate 重写历史（谨慎使用）：
+#    git lfs migrate import --include="*.terrain,*.glb,*.jpg,*.png" --everything
+# ============================================================
+
+# ---------- 地形 / GIS 二进制 ----------
+*.terrain      filter=lfs diff=lfs merge=lfs -text
+*.tif          filter=lfs diff=lfs merge=lfs -text
+*.tiff         filter=lfs diff=lfs merge=lfs -text
+*.hgt          filter=lfs diff=lfs merge=lfs -text
+*.img          filter=lfs diff=lfs merge=lfs -text
+
+# ---------- 3D 模型 ----------
+*.glb          filter=lfs diff=lfs merge=lfs -text
+*.gltf         filter=lfs diff=lfs merge=lfs -text
+*.fbx          filter=lfs diff=lfs merge=lfs -text
+*.obj          filter=lfs diff=lfs merge=lfs -text
+*.3ds          filter=lfs diff=lfs merge=lfs -text
+
+# ---------- 图像 / 纹理 / 天空盒 ----------
+*.jpg          filter=lfs diff=lfs merge=lfs -text
+*.jpeg         filter=lfs diff=lfs merge=lfs -text
+*.png          filter=lfs diff=lfs merge=lfs -text
+*.gif          filter=lfs diff=lfs merge=lfs -text
+*.webp         filter=lfs diff=lfs merge=lfs -text
+*.bmp          filter=lfs diff=lfs merge=lfs -text
+*.tga          filter=lfs diff=lfs merge=lfs -text
+*.hdr          filter=lfs diff=lfs merge=lfs -text
+*.exr          filter=lfs diff=lfs merge=lfs -text
+*.ktx2         filter=lfs diff=lfs merge=lfs -text
+*.dds          filter=lfs diff=lfs merge=lfs -text
+
+# ---------- 视频 / 录屏 ----------
+*.mp4          filter=lfs diff=lfs merge=lfs -text
+*.webm         filter=lfs diff=lfs merge=lfs -text
+*.mov          filter=lfs diff=lfs merge=lfs -text
+
+# ---------- 字体 ----------
+*.otf          filter=lfs diff=lfs merge=lfs -text
+*.ttf          filter=lfs diff=lfs merge=lfs -text
+*.woff         filter=lfs diff=lfs merge=lfs -text
+*.woff2        filter=lfs diff=lfs merge=lfs -text
+
+# ---------- 压缩包 / 大数据产物 ----------
+*.gz           filter=lfs diff=lfs merge=lfs -text
+*.zip          filter=lfs diff=lfs merge=lfs -text
+*.tar          filter=lfs diff=lfs merge=lfs -text
+*.7z           filter=lfs diff=lfs merge=lfs -text
+*.rar          filter=lfs diff=lfs merge=lfs -text
+*.phar         filter=lfs diff=lfs merge=lfs -text
+
+# ---------- 文档 / GitHub 标准 ----------
+# 明确告诉 Git：常见代码/文档类型使用 LF 换行（Windows 自动 CRLF→LF）
+*.ts           text eol=lf
+*.tsx          text eol=lf
+*.js           text eol=lf
+*.jsx          text eol=lf
+*.vue          text eol=lf
+*.css          text eol=lf
+*.scss         text eol=lf
+*.json         text eol=lf
+*.md           text eol=lf
+*.html         text eol=lf
+*.yml          text eol=lf
+*.yaml         text eol=lf
+*.sh           text eol=lf
+
+# Windows 批处理保留 CRLF（否则某些 CMD 会无法识别）
+*.bat          text eol=crlf
+*.cmd          text eol=crlf
+*.ps1          text eol=crlf
