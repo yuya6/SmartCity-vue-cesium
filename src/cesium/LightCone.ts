@@ -60,7 +60,7 @@ const DEFAULT_OPTIONS = {
   initialHeading: 0,
   targetHeading: Math.PI,
   durationPerDirection: 1,
-  modelUrl: '/model/pyramid.glb',
+  modelUrl: `${import.meta.env.BASE_URL}model/pyramid.glb`,
   scale: 200,
   minimumPixelSize: 12,
   maximumScale: 20000,

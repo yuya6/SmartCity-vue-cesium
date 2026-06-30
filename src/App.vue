@@ -393,8 +393,8 @@ onMounted(async () => {
    */
    roadLightLineInstance = new RoadLightLine({
      viewer,
-     geojsonUrl: '/geojson/roadline.geojson',
-     textureUrl: '/texture/spriteline1.png',
+     geojsonUrl: `${import.meta.env.BASE_URL}geojson/roadline.geojson`,
+     textureUrl: `${import.meta.env.BASE_URL}texture/spriteline1.png`,
      textureRepeat: 1.0,
      color: Cesium.Color.fromCssColorString('#50FF80'),
      style: 'sprite',
