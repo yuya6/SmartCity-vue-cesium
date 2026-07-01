@@ -192,6 +192,10 @@ export interface TimelineProps {
   width?: number | string;
   /** 高度（仅 horizontal 模式） */
   height?: number | string;
+  /** 是否可折叠 */
+  collapsible?: boolean;
+  /** 尺寸 sm/md */
+  size?: 'sm' | 'md';
 }
 
 /* ---------- 筛选器 ---------- */

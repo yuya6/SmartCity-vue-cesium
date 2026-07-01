@@ -1,64 +1,78 @@
 <template>
   <div
     class="timeline smart-panel"
-    :class="[`timeline--${orientation}`]"
+    :class="[`timeline--${orientation}`, { 'timeline--collapsed': collapsible && collapsed }, { 'timeline--compact': props.size === 'sm' }]"
     :style="wrapStyle"
   >
-    <div v-if="title" class="timeline__title smart-title">
-      <slot name="icon" />
-      {{ title }}
-    </div>
-    <div
-      class="timeline__track-wrap"
-      ref="trackRef"
-      @pointerdown="onTrackDown"
-    >
-      <!-- 时间刻度轴 -->
-      <div class="timeline__track" :class="{ 'timeline__track--v': orientation === 'vertical' }">
-        <div class="timeline__track-bg" />
-        <div class="timeline__track-progress" :style="progressStyle" />
-        <!-- 事件点 -->
-        <div
-          v-for="(ev, i) in events"
-          :key="i"
-          class="timeline__event"
-          :class="[`timeline__event--${ev.status || 'info'}`, { 'timeline__event--active': isActive(i) }]"
-          :style="eventStyle(i)"
-          @pointerdown.stop="selectEvent(i)"
-          :title="ev.title"
-        >
-          <span class="timeline__dot"></span>
-          <div class="timeline__popup">
-            <div class="timeline__popup-time mono">{{ formatTime(ev.time) }}</div>
-            <div class="timeline__popup-title">{{ ev.title }}</div>
-            <div v-if="ev.description" class="timeline__popup-desc text-secondary">{{ ev.description }}</div>
+    <!-- 折叠状态：仅显示窄条 -->
+    <template v-if="collapsible && collapsed">
+      <div class="timeline__collapse-bar" @click="toggleCollapse">
+        <span class="timeline__collapse-title">{{ title }}</span>
+        <span class="timeline__toggle-icon">▶</span>
+      </div>
+    </template>
+
+    <!-- 展开状态：完整内容 -->
+    <template v-else>
+      <div v-if="title" class="timeline__title smart-title">
+        <slot name="icon" />
+        {{ title }}
+        <button v-if="collapsible" class="timeline__toggle" @click="toggleCollapse">
+          <span class="timeline__toggle-icon">▼</span>
+        </button>
+      </div>
+      <div
+        class="timeline__track-wrap"
+        ref="trackRef"
+        @pointerdown="onTrackDown"
+      >
+        <!-- 时间刻度轴 -->
+        <div class="timeline__track" :class="{ 'timeline__track--v': orientation === 'vertical' }">
+          <div class="timeline__track-bg" />
+          <div class="timeline__track-progress" :style="progressStyle" />
+          <!-- 事件点 -->
+          <div
+            v-for="(ev, i) in events"
+            :key="i"
+            class="timeline__event"
+            :class="[`timeline__event--${ev.status || 'info'}`, { 'timeline__event--active': isActive(i) }]"
+            :style="eventStyle(i)"
+            @pointerdown.stop="selectEvent(i)"
+            :title="ev.title"
+          >
+            <span class="timeline__dot"></span>
+            <div class="timeline__popup">
+              <div class="timeline__popup-time mono">{{ formatTime(ev.time) }}</div>
+              <div class="timeline__popup-title">{{ ev.title }}</div>
+              <div v-if="ev.description" class="timeline__popup-desc text-secondary">{{ ev.description }}</div>
+            </div>
+          </div>
+          <!-- 当前游标 -->
+          <div
+            v-if="interactive"
+            class="timeline__cursor"
+            :style="cursorStyle"
+          >
+            <span class="timeline__cursor-line" />
+            <span class="timeline__cursor-dot"></span>
           </div>
         </div>
-        <!-- 当前游标 -->
-        <div
-          v-if="interactive"
-          class="timeline__cursor"
-          :style="cursorStyle"
-        >
-          <span class="timeline__cursor-line" />
-          <span class="timeline__cursor-dot"></span>
-        </div>
       </div>
-    </div>
-    <!-- 详情列表 -->
-    <ul class="timeline__list" v-if="showList">
-      <li
-        v-for="(ev, i) in events"
-        :key="i"
-        class="timeline__list-item"
-        :class="{ active: selectedIdx === i }"
-        @pointerdown="selectEvent(i)"
-      >
-        <span class="timeline__list-time mono text-secondary">{{ formatTime(ev.time) }}</span>
-        <StatusDot :status="ev.status" size="sm" pulse />
-        <span class="timeline__list-title">{{ ev.title }}</span>
-      </li>
-    </ul>
+      <!-- 详情列表 -->
+      <ul class="timeline__list" v-if="showList">
+        <li
+          v-for="(ev, i) in events"
+          :key="i"
+          class="timeline__list-item"
+          :class="{ active: selectedIdx === i }"
+          @pointerdown="selectEvent(i)"
+        >
+          <span class="timeline__list-time mono text-secondary">{{ formatTime(ev.time) }}</span>
+          <StatusDot :status="ev.status" size="sm" pulse />
+          <span class="timeline__list-title">{{ ev.title }}</span>
+        </li>
+      </ul>
+    </template>
   </div>
 </template>
 
@@ -82,16 +96,25 @@ const props = withDefaults(defineProps<TimelineProps>(), {
   title: '时间轴',
   width: '100%',
   height: 'auto',
+  collapsible: false,
+  size: 'md',
 });
 
 const emit = defineEmits<{
   (e: 'update:current', v: number): void;
   (e: 'select', idx: number, event: (typeof props.events)[number]): void;
   (e: 'change', v: number): void;
+  (e: 'collapse', collapsed: boolean): void;
 }>();
 
 const trackRef = ref<HTMLDivElement>();
 const selectedIdx = ref<number | null>(null);
+const collapsed = ref(false);
+
+function toggleCollapse() {
+  collapsed.value = !collapsed.value;
+  emit('collapse', collapsed.value);
+}
 
 const wrapStyle = computed(() => ({
   width: typeof props.width === 'number' ? `${props.width}px` : props.width ?? '100%',
@@ -360,4 +383,100 @@ defineExpose({ selectEvent, setCurrent: (t: number) => { currentTime.value = t; 
 }
 .timeline__list-time { font-size: 0.7rem; }
 .timeline__list-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ---------- 折叠/展开 ---------- */
+.timeline__toggle {
+  margin-left: auto;
+  padding: 2px 6px;
+  background: rgba(0,212,255,.1);
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  color: var(--accent-cyan);
+  cursor: pointer;
+  font-size: 0.65rem;
+  transition: background .15s;
+}
+.timeline__toggle:hover {
+  background: rgba(0,212,255,.2);
+}
+.timeline__toggle-icon {
+  display: inline-block;
+  transition: transform .2s;
+}
+
+/* 折叠窄条 */
+.timeline__collapse-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 32px;
+  padding: 0 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  background: rgba(0,212,255,.06);
+  border: 1px solid var(--border-strong);
+  transition: background .15s;
+}
+.timeline__collapse-bar:hover {
+  background: rgba(0,212,255,.12);
+}
+.timeline__collapse-title {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.timeline__collapse-bar .timeline__toggle-icon {
+  font-size: 0.6rem;
+  color: var(--accent-cyan);
+  flex-shrink: 0;
+}
+
+.timeline--collapsed {
+  padding: 4px 8px;
+  gap: 0;
+}
+
+/* ---------- 紧凑模式 ---------- */
+.timeline--compact {
+  padding: 6px 10px 10px;
+  gap: 4px;
+}
+.timeline--compact .timeline__title {
+  font-size: 0.78rem;
+  margin-bottom: 2px;
+}
+.timeline--compact .timeline__track-wrap {
+  padding: 8px 6px 10px;
+}
+.timeline--compact .timeline__track {
+  height: 4px;
+}
+.timeline--compact .timeline__event {
+  width: 10px; height: 10px;
+  top: -2px;
+}
+.timeline--compact .timeline__dot {
+  width: 6px; height: 6px;
+}
+.timeline--compact .timeline__popup {
+  min-width: 120px;
+  padding: 4px 8px;
+  font-size: 0.68rem;
+}
+.timeline--compact .timeline__list {
+  margin-top: 4px;
+  gap: 2px;
+  max-height: 120px;
+}
+.timeline--compact .timeline__list-item {
+  padding: 3px 8px;
+  font-size: 0.72rem;
+  grid-template-columns: 70px 12px 1fr;
+  gap: 6px;
+}
+.timeline--compact .timeline__list-time {
+  font-size: 0.65rem;
+}
 </style>

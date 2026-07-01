@@ -129,9 +129,12 @@
       <Timeline
         v-model:current="tlCurrent"
         :events="tlEvents"
-        title="今日事件（支持拖拽游标）"
+        title="今日事件"
         orientation="horizontal"
         interactive
+        collapsible
+        size="sm"
+        width="85%"
         @select="(_, ev) => console.log('事件:', ev.title)"
       />
     </template>
